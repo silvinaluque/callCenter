@@ -129,6 +129,39 @@ public class DispatcherTest {
         assertEquals(CALLS_20, callCenterRules.getEmployees().stream().mapToInt(employee -> employee.getHandledCalls()).sum());
     }
 
+    
+    /**
+     * Test with 15 employees and 20 calls
+     * @throws InterruptedException
+     */
+    @Test
+    public void testDispatch20Calls15Employees() throws InterruptedException {
+        CallCenterRules callCenterRules = buildCallCenterRules15Employees();
+        Dispatcher dispatcher = new Dispatcher(callCenterRules);
+        dispatcher.start();
+        TimeUnit.SECONDS.sleep(1);
+        //pool with  only dispatcher thread 
+        ExecutorService executorService = Executors.newSingleThreadExecutor();
+        executorService.execute(dispatcher);
+        TimeUnit.SECONDS.sleep(1);
+
+        buildCallList(CALLS_20).stream().forEach(call -> {
+            dispatcher.dispatchCall(call);
+            try {
+                TimeUnit.SECONDS.sleep(1);
+            } catch (InterruptedException e) {
+                fail();
+            }
+        });
+        
+        //validate all calls were handled
+        executorService.awaitTermination(CALL_DURATION_MAX * 2, TimeUnit.SECONDS);
+        assertEquals(CALLS_20, callCenterRules.getEmployees().stream().mapToInt(employee -> employee.getHandledCalls()).sum());
+    }
+    
+    
+
+
 
 	/**
      * Build mock employees list
@@ -149,6 +182,34 @@ public class DispatcherTest {
                 supervisor1, supervisor2, supervisor3, director1);
     }
 
+    
+	/**
+     * Build mock employees list
+     * @return
+     */
+    private static List<Employee> build15EmployeeList() {
+	    Employee operator1 = new Operator("Operador1");
+	    Employee operator2 = new Operator("Operador2");
+	    Employee operator3 = new Operator("Operador3");
+	    Employee operator4 = new Operator("Operador4");
+	    Employee operator5 = new Operator("Operador5");
+	    Employee operator6 = new Operator("Operador6");
+	    Employee operator7 = new Operator("Operador7");
+	    Employee operator8 = new Operator("Operador8");
+	    Employee operator9 = new Operator("Operador9");
+	    Employee operator10 = new Operator("Operador10");
+	    Employee operator11 = new Operator("Operador11");
+	    Employee supervisor1= new Supervisor("Supervisor1");
+	    Employee supervisor2= new Supervisor("Supervisor2");
+	    Employee supervisor3= new Supervisor("Supervisor3");
+	    Employee director1 = new Director("Director1");
+        return Arrays.asList(operator1, operator2, operator3, operator4, operator5, operator6,
+                supervisor1, supervisor2, supervisor3, director1, operator7,operator8,operator9,
+                operator10, operator11);
+    }
+//    
+    
+    
     private static List<Call> buildCallList(int numberOfCalls) {
         return MockCallGenerator.buildListCalls(numberOfCalls, CALL_DURATION_MIN, CALL_DURATION_MAX);
     }
@@ -178,6 +239,20 @@ public class DispatcherTest {
 		callRules.setEmployeeSelector(employeeSelector );
 	    return callRules;	
     }
+
+    
+    /**
+     * Build call center rules 15 employees
+     * @return
+     */
+	private CallCenterRules buildCallCenterRules15Employees() {
+	    CallCenterRules callRules = new CallCenterRules();
+        List<Employee> employeeList = build15EmployeeList();
+		callRules.setEmployees(employeeList);
+	    EmployeeCallSelectorStrategy employeeSelector = new EmployeeCallSelectorStrategy();
+		callRules.setEmployeeSelector(employeeSelector );
+	    return callRules;
+	}
 
 
     /**

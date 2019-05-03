@@ -18,7 +18,8 @@ public class Dispatcher implements Runnable {
 
     private static final Logger logger = LoggerFactory.getLogger(Dispatcher.class);
 
-    public static final Integer MAX_THREADS = 10;
+
+	private static final int MIN_CURRENT_CALLS = 10;
 
     private Boolean ready;
 
@@ -38,10 +39,11 @@ public class Dispatcher implements Runnable {
     	Validate.notNull(callCenterRules);
         Validate.notNull(callCenterRules.getEmployees());
         Validate.notNull(callCenterRules.getEmployeeSelector());
+        Validate.isTrue(callCenterRules.getEmployees().size() >= MIN_CURRENT_CALLS);
         this.employees = new ConcurrentLinkedDeque<Employee>(callCenterRules.getEmployees());
         this.callEmployeeSelectorStrategy = callCenterRules.getEmployeeSelector();
         this.offeredCalls = new ConcurrentLinkedDeque<>();
-        this.executorService = Executors.newFixedThreadPool(MAX_THREADS);
+        this.executorService = Executors.newFixedThreadPool(employees.size());
         
     }
 
