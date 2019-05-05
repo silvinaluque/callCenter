@@ -48,7 +48,7 @@ public class Employee implements Runnable {
 
     
     public synchronized void takeCall(Call call) {
-        logger.info("Employee " + Thread.currentThread().getName() + this.getName()  + " take a call of " + call.getDuration() + " sec.");
+        logger.info("Employee " +  this.getName()  + " take a call of " + call.getDuration() + " sec.");
         this.incomingCalls.add(call);
     }
 

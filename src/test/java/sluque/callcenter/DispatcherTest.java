@@ -2,7 +2,6 @@ package sluque.callcenter;
 
 import org.junit.Test;
 import sluque.callcenter.Call;
-import sluque.callcenter.Dispatcher;
 import sluque.callcenter.Employee;
 import java.util.Arrays;
 import java.util.List;
@@ -72,7 +71,7 @@ public class DispatcherTest {
      * Test with 2 employees and 10 calls
      * @throws InterruptedException
      */
-    @Test
+    @Test(expected = IllegalArgumentException.class)
     public void testDispatchCallsTo2Employees() throws InterruptedException {
         CallCenterRules callCenterRules = buildCallCenterRules2Employees();
         Dispatcher dispatcher = new Dispatcher(callCenterRules);

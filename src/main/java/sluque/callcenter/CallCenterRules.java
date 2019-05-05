@@ -30,7 +30,13 @@ public class CallCenterRules {
 	public void setEmployeeSelector(EmployeeCallSelectorStrategy employeeSelector) {
 		this.employeeCallSelector = employeeSelector;
 	}
-	
+	/**
+	 * Get a available employee with the selector rules
+	 * @return 
+	 */
+	public Employee getAvailableEmployee() {
+		return this.employeeCallSelector.findNextEmployeeAvailable(employees);
+	}
 
 	
 

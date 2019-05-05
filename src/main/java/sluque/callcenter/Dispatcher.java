@@ -9,6 +9,7 @@ import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+
 /**
  * Dispatcher calls model
  * @author silvina.luque
@@ -18,18 +19,16 @@ public class Dispatcher implements Runnable {
 
     private static final Logger logger = LoggerFactory.getLogger(Dispatcher.class);
 
-
 	private static final int MIN_CURRENT_CALLS = 10;
 
     private Boolean ready;
 
     private ExecutorService executorService;
-
-    private ConcurrentLinkedDeque<Employee> employees;
+    
+    private CallCenterRules callCenterRules;
 
     private ConcurrentLinkedDeque<Call> offeredCalls;
 
-    private EmployeeCallSelectorStrategy callEmployeeSelectorStrategy;
     
     /**
      * Dispatcher creation 
@@ -40,11 +39,10 @@ public class Dispatcher implements Runnable {
         Validate.notNull(callCenterRules.getEmployees());
         Validate.notNull(callCenterRules.getEmployeeSelector());
         Validate.isTrue(callCenterRules.getEmployees().size() >= MIN_CURRENT_CALLS);
-        this.employees = new ConcurrentLinkedDeque<Employee>(callCenterRules.getEmployees());
-        this.callEmployeeSelectorStrategy = callCenterRules.getEmployeeSelector();
+        this.callCenterRules = callCenterRules;
         this.offeredCalls = new ConcurrentLinkedDeque<>();
-        this.executorService = Executors.newFixedThreadPool(employees.size());
-        
+        this.executorService = Executors.newFixedThreadPool(callCenterRules.getEmployees().size());
+                
     }
 
 
@@ -60,7 +58,7 @@ public class Dispatcher implements Runnable {
 
     public synchronized void start() {
         this.ready = true;
-        for (Employee employee : this.employees) {
+        for (Employee employee : this.callCenterRules.getEmployees()) {
         	//employees "threads" in line!
             this.executorService.execute(employee);
         }
@@ -85,7 +83,7 @@ public class Dispatcher implements Runnable {
             if (this.offeredCalls.isEmpty()) {
                 continue;
             } else {
-                Employee employee = this.callEmployeeSelectorStrategy.findNextEmployeeAvailable(this.employees);
+                Employee employee = this.callCenterRules.getAvailableEmployee();
                 if (employee == null) {
                     continue;
                 }
